@@ -1,0 +1,32 @@
+
+.custom_input_wrapper {
+    @include center(flex-start);
+    @include media(height, 40);
+    @include media(border-radius, 8);
+    @include media(padding, 12, 14);
+    border: 2px solid $Cyan500;
+    width: 100%;
+    position: relative;
+    .btn_close{
+        @include media(width,10);
+        @include media(height,10);
+    }
+    input{
+		@include media(font-size, 16);
+		@include media(line-height, 24);
+		color: $Gray900;
+		font-weight: 400;
+		appearance: none;
+		outline: 0;
+		box-shadow: none;
+		border: 0;
+		width: 100%;
+		height: 100%;
+		background-color: transparent;
+
+		&::placeholder {
+			color: $Gray100;
+		}
+	}
+
+}

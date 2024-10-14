@@ -1,0 +1,18 @@
+$faces: (
+	200: Thin,
+	300: Light,
+	400: Regular,
+	500: Medium,
+	600: Bold,
+);
+
+@each $key, $value in $faces {
+	@font-face {
+	  font-family: 'Spoqa Han Sans Neo';
+	  font-weight: #{$key};
+	  src: local('Spoqa Han Sans Neo #{$value}'),
+		   url('./fonts/SpoqaHanSansNeo-#{$value}.woff2') format('woff2'),
+		   url('./fonts/SpoqaHanSansNeo-#{$value}.woff') format('woff'),
+		   url('./fonts/SpoqaHanSansNeo-#{$value}.ttf') format('truetype');
+	}
+  }

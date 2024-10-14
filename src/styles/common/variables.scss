@@ -1,0 +1,196 @@
+// colors
+$Black: #000;
+$White: #fff;
+$BgColor: #fafafa;
+$Primary: #1c9da9;
+$Cyan100: #ecfdff;
+$Cyan500: #1c9da9;
+$Cyan600: #15767f;
+$Cyan700: #0e4d53;
+$Red100: #ffe5e6;
+$Red500: #da120d;
+$Red600: #ca3535;
+$Orange100: #ffe1d0;
+$Orange500: #ff7638;
+$Darkblue100: #f2f6fd;
+$Darkblue400: #4281da;
+$Darkblue500: #1c57a9;
+$Gray50: #f7f7f7;
+$Gray100: #efefef;
+$Gray200: #d9d9d9;
+$Gray300: #c9c9c9;
+$Gray400: #a9a9a9;
+$Gray500: #999999;
+$Gray600: #6a6a6a;
+$Gray700: #4d4d4d;
+$Gray800: #333333;
+$Gray900: #1a1a1a;
+$BlackAlpha100: rgba(0, 0, 0, 0.1);
+$BlackAlpha200: rgba(0, 0, 0, 0.2);
+$BlackAlpha300: rgba(0, 0, 0, 0.3);
+$BlackAlpha400: rgba(0, 0, 0, 0.4);
+$BlackAlpha500: rgba(0, 0, 0, 0.5);
+$BlackAlpha600: rgba(0, 0, 0, 0.6);
+$BlackAlpha700: rgba(0, 0, 0, 0.7);
+$BlackAlpha800: rgba(0, 0, 0, 0.8);
+$BlackAlpha900: rgba(0, 0, 0, 0.9);
+
+// size
+$TABLIT_WIDTH: 768;
+$MOBILE_WIDTH: 640;
+$MOBSCALE: 1.7067;
+$VH: calc(var(--vh, 1vh) * 100);
+
+@mixin tiny {
+	@media (max-width: #{$MOBILE_WIDTH}px) {
+		@content;
+	}
+}
+
+@mixin fontValue($size, $weight) {
+	@include media(font-size, $size);
+    font-weight: $weight;
+	@content;
+}
+// rem
+@function rem($size, $base: 16) {
+	@return #{$size / $base}rem;
+}
+
+// flex
+@mixin center($justify: center, $align: center, $direction: row) {
+	display: flex;
+	justify-content: $justify;
+	align-items: $align;
+
+	@content;
+}
+
+// margin | padding / border-radius 4value
+@mixin responsiveValue(
+	$property,
+	$value1,
+	$value2: null,
+	$value3: null,
+	$value4: null,
+	$maxWidth,
+	$important,
+	$scale: 1
+) {
+	@if ($value2 == null) {
+		#{$property}: calc(100vw * ($value1 / $maxWidth) * $scale) #{$important};
+		@media (min-width: #{$maxWidth}px) {
+			#{$property}: #{$value1}px #{$important};
+		}
+	} @else {
+		#{$property}: calc(100vw * ($value1 / $maxWidth) * $scale)
+			#{if($value2 != 'auto', calc(100vw * ($value2 / $maxWidth) * $scale), 'auto')}
+			#{if($value3 != null, 'calc(100vw * (' + $value3 + ' / ' + $maxWidth + ')' + $scale ')', '')}
+			#{if($value4 != null, 'calc(100vw * (' + $value4 + ' / ' + $maxWidth + ')' + $scale ')', '')}
+			#{$important};
+		@media (min-width: #{$maxWidth}px) {
+			#{$property}: #{$value1}px #{if($value2 != 'auto', $value2 + 'px', 'auto')} #{if(
+					$value3 != null,
+					$value3 + 'px',
+					''
+				)} #{if($value4 != null, $value4 + 'px', '')} #{$important};
+		}
+	}
+}
+
+@mixin media($property, $val1: null, $val2: null, $val3: null, $val4: null, $important: '') {
+	@if ($property == border-radius) {
+		@if ($val2 == null) {
+			@media (max-width: #{$MOBILE_WIDTH}px) {
+				#{$property}: calc(100vw * (($val1) / $MOBILE_WIDTH) * $MOBSCALE) #{$important};
+			}
+			@media (min-width: #{$MOBILE_WIDTH + 1}px) and (max-width: #{$TABLIT_WIDTH}px) {
+				#{$property}: calc(100vw * (($val1) / $TABLIT_WIDTH)) #{$important};
+			}
+			@media (min-width: #{$TABLIT_WIDTH + 1}px) {
+				#{$property}: #{$val1}px #{$important};
+			}
+		} @else {
+			@media (max-width: #{$MOBILE_WIDTH}px) {
+				border-radius: #{($val1)}px #{($val2)}px #{($val3)}px #{($val4)}px #{$important};
+			}
+			@media (min-width: #{$MOBILE_WIDTH + 1}px) and (max-width: #{$TABLIT_WIDTH}px) {
+				border-radius: #{($val1)}px #{($val2)}px #{($val3)}px #{($val4)}px #{$important};
+			}
+			@media (min-width: #{$TABLIT_WIDTH + 1}px) {
+				border-radius: calc(100vw * ($val1 / $TABLIT_WIDTH)) calc(100vw * ($val2 / $TABLIT_WIDTH))
+					calc(100vw * ($val3 / $TABLIT_WIDTH)) calc(100vw * ($val4 / $TABLIT_WIDTH)) #{$important};
+			}
+		}
+	} @else if($property == padding or $property == margin) {
+		@media (max-width: #{$MOBILE_WIDTH}px) {
+			@include responsiveValue(
+				$property,
+				($val1),
+				($val2),
+				($val3),
+				($val4),
+				$MOBILE_WIDTH,
+				$important,
+				$MOBSCALE
+			);
+		}
+		@media (min-width: #{$MOBILE_WIDTH + 1}px) {
+			@include responsiveValue($property, ($val1), ($val2), ($val3), ($val4), $TABLIT_WIDTH, $important, 1);
+		}
+	} @else {
+		@media (max-width: #{$MOBILE_WIDTH}px) {
+			#{$property}: calc(100vw * (($val1) / $MOBILE_WIDTH) * $MOBSCALE) #{$important};
+		}
+		@media (min-width: #{$MOBILE_WIDTH + 1}px) and (max-width: #{$TABLIT_WIDTH}px) {
+			#{$property}: calc(100vw * (($val1) / $TABLIT_WIDTH)) #{$important};
+		}
+		@media (min-width: #{$TABLIT_WIDTH + 1}px) {
+			#{$property}: #{($val1)}px #{$important};
+		}
+	}
+}
+
+// calculation
+@mixin mediaCalc($property, $value1, $calc, $value2) {
+	@media (max-width: #{$MOBILE_WIDTH}px) {
+		#{$property}: calc(#{$value1} #{$calc} calc(100vw * (#{($value2)} / #{$MOBILE_WIDTH}) * #{$MOBSCALE}));
+	}
+	@media (min-width: #{$MOBILE_WIDTH + 1}px) and (max-width: #{$TABLIT_WIDTH}px) {
+		#{$property}: calc(#{$value1} #{$calc} calc(100vw * (#{($value2)} / #{$TABLIT_WIDTH})));
+	}
+	@media (min-width: #{$TABLIT_WIDTH + 1}px) {
+		#{$property}: calc(#{$value1} #{$calc} #{($value2)}px);
+	}
+}
+
+// box shadow media query
+@mixin boxshadow($x, $y, $blur, $spread: 0, $color, $inset: '') {
+	@if ($inset== '') {
+		@media (max-width: #{$MOBILE_WIDTH}px) {
+			box-shadow: calc(100vw * (($x) / $MOBILE_WIDTH) * $MOBSCALE)
+				calc(100vw * (($y) / $MOBILE_WIDTH) * $MOBSCALE) calc(100vw * (($blur) / $MOBILE_WIDTH) * $MOBSCALE)
+				calc(100vw * (($spread) / $MOBILE_WIDTH) * $MOBSCALE) $color;
+		}
+		@media (min-width: #{$MOBILE_WIDTH + 1}px) and (max-width: #{$TABLIT_WIDTH}px) {
+			box-shadow: calc(100vw * (($x) / $TABLIT_WIDTH)) calc(100vw * (($y) / $TABLIT_WIDTH))
+				calc(100vw * (($blur) / $TABLIT_WIDTH)) calc(100vw * (($spread) / $TABLIT_WIDTH)) $color;
+		}
+		@media (min-width: #{$TABLIT_WIDTH + 1}px) {
+			box-shadow: #{($x)}px #{($y)}px #{($blur)}px #{($spread)}px #{$color};
+		}
+	} @else {
+		@media (max-width: #{$MOBILE_WIDTH}px) {
+			box-shadow: inset calc(100vw * (($x) / $MOBILE_WIDTH) * $MOBSCALE)
+				calc(100vw * (($y) / $MOBILE_WIDTH) * $MOBSCALE) calc(100vw * (($blur) / $MOBILE_WIDTH) * $MOBSCALE)
+				calc(100vw * (($spread) / $MOBILE_WIDTH) * $MOBSCALE) $color;
+		}
+		@media (min-width: #{$MOBILE_WIDTH + 1}px) and (max-width: #{$TABLIT_WIDTH}px) {
+			box-shadow: inset calc(100vw * (($x) / $TABLIT_WIDTH)) calc(100vw * (($y) / $TABLIT_WIDTH))
+				calc(100vw * (($blur) / $TABLIT_WIDTH)) calc(100vw * (($spread) / $TABLIT_WIDTH)) $color;
+		}
+		@media (min-width: #{$TABLIT_WIDTH + 1}px) {
+			box-shadow: inset #{($x)}px #{($y)}px #{($blur)}px #{($spread)}px #{$color};
+		}
+	}
+}

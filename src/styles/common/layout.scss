@@ -1,0 +1,10 @@
+.container {
+	@include center;
+	width: 100vw;
+	height: $VH;
+	overflow: hidden;
+	@include tiny {
+		flex-direction: column;
+
+	}
+}

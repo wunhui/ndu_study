@@ -1,0 +1,158 @@
+.wrapper_left {
+    @include media(width, 350);
+    height: 100%;
+    border-right: 1px solid $Gray200;
+    @include tiny {
+        width: 100%;
+        @include media(height, 50);
+    }
+}
+
+.search_form {
+    @include media(padding, 10, 12);
+    position: relative;
+    @include tiny {
+        width: 100%;
+        position: absolute;
+        top: 0;
+    }
+    > .top {
+        @include media(gap, 8);
+        @include media(padding-bottom, 12);
+        border-bottom: 1px solid $Cyan500;
+        display: flex;
+        .custom_input_wrapper {
+            @include mediaCalc(width, 100%, '-', 75);
+            @include media(height, 40);
+        }
+        .btn_search {
+            @include media(width, 60);
+            @include media(height, 40);
+            @include fontValue($size: 14, $weight: bold);
+            background-color: $Cyan500;
+            border-radius: 8px;
+            color: $White;
+        }
+    }
+    > .content {
+        .address_wrap {
+            @include media(padding-bottom, 120);
+            overflow-y: auto;
+            height: 100vh;
+            li + li {
+                border-top: 1px solid $Gray200;
+            }
+            li {
+                @include media(padding, 8,0);
+                .title_wrap {
+                    a {
+                        display: block;
+                        text-align: left;
+                        b {color: $Cyan500; @include fontValue($size: 16, $weight: 700);};
+                        span {
+                            color: $Gray900;
+                            @include media(margin-left, 4);
+                            @include fontValue($size: 14, $weight: 400);
+                        }
+                    }
+                }
+                .address_list {
+                    @include media(margin-top, 8);
+                    @include fontValue($size: 14, $weight: 400);
+                    p + p {
+                        @include media(margin-top, 4);
+                    }
+                    p { text-align: left; color:  $Gray900; }
+                }
+            }
+        }
+        .fetching_text{ 
+            @include fontValue($size: 16, $weight: bold);
+            @include media(padding-top, 60);
+            text-align: center;
+        }
+    }
+}
+
+.search_item_view {
+    @include media(width, 300);
+    @include media(right, -320);
+    @include media(top, 20);
+    @include mediaCalc(height, 100%, '-', 110);
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 2;
+    background-color: $White;
+    position: absolute;
+    .img_wrap {
+        position: relative;
+        @include media(height, 200);
+        @include center;
+        background-color: $Gray200;
+        .btn_close {
+            @include media(width, 15);
+            @include media(height, 15);
+            @include media(top, 15);
+            @include media(right, 15);
+            position: absolute;
+        }
+    }
+    .title_wrap {
+        @include media(padding, 20);
+        @include center;
+        flex-direction: column;
+        p {
+            @include media(gap, 4);
+            @include center;
+            flex-direction: column;
+            b {color: $Black; @include fontValue($size: 20, $weight: 700);};
+            span {
+                color: $Gray900;
+                @include media(margin-left, 4);
+                @include fontValue($size: 16, $weight: 400);
+            }
+        }
+    }
+    .content {
+        border-top: 1px solid $Gray200;
+        border-bottom: 1px solid $Gray200;
+        .btn_wrap {
+            display: flex;
+            .btn_list {
+                flex: 1;
+                &:last-child {
+                    position: relative;
+                    &::before {
+                        content: '';
+                        width: 1px;
+                        height: 50%;
+                        background-color: $Gray200;
+                        position: absolute;
+                        left: 0;
+                        top: 50%;
+                        transform: translateY(-50%);
+                    }
+                }
+                button {
+                    @include center;
+                    @include media(padding, 20);
+                    @include media(gap, 4);
+                    flex-direction: column;
+                    width: 100%;
+                }
+                .icon_box {
+                    @include media(width, 20);
+                    @include media(height, 20);
+                }
+                .text {
+                    @include media(font-size, 14);
+                }
+            }
+        }
+        .blank {
+
+            @include media(height, 10);
+            background-color: $Gray200;
+        }
+    }
+}
