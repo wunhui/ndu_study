@@ -5,7 +5,7 @@ import { IconStar } from './icons/IconStar';
 import useMainStore from '@store/useMainStore';
 import { IconClose } from './icons/IconClose';
 import { useEffect, useState } from 'react';
-import { fetchKeyword } from '../api/fetchPlaces'
+import { fetchSearch } from '../api/fetchPlaces'
 import { useQuery } from '@tanstack/react-query';
 
 export const LeftWrapper = () => {
@@ -18,48 +18,56 @@ export const LeftWrapper = () => {
 
 export const SearchForm = () => {
 	const {
-		center,
         searchList,
         setSearchList,
         searchValue,
         setSearchValue,
-		searchQuery,
-		setSearchQuery
+		listViewPopup,
+		setListViewPopup,
+		listViewData,
+		setListViewData
     } = useMainStore()
+	const [inputValue, setInputValue] = useState(''); 
     const { data, refetch, isFetching } = useQuery({
-        queryKey: ['fetchKeyword', searchValue],
-		queryFn: () => fetchKeyword({
-			term: searchValue
-		  }),
-        enabled: false, 
+        queryKey: ['fetchSearch', searchValue],
+		queryFn: () => fetchSearch({ term: searchValue }), 
+		enabled: false,
     });
 
     const handleSearch = () => {
-		if (searchValue) {
-			refetch().then((response) => {
-				if (response && response.data && response.data.length > 0) {
-                    setSearchList(response.data);
-                } else {
-                    console.error('No search results found');
-                }
-            }).catch((error) => {
-                console.error('Error fetching places:', error);
-            });
-        } else if(!searchValue.replace(/^\s+|\s+$/g, '')) {
+        if (!inputValue.trim()) {
             alert('키워드를 입력해주세요!');
             return false;
         }
+        setSearchValue(inputValue); 
+        refetch(); 
     };
-    const handleListOpen = () => {}
+
+    useEffect(() => {
+        if (data) {
+            setSearchList(data); 
+        } else {
+            setSearchList([]); 
+        }
+    }, [data, setSearchList]);
+
+	// 강남역
+	const handleListOpen = (item, idx) => {
+		setListViewPopup(true)
+		setListViewData(searchList[idx])
+	}
 
 	return (
 		<div className='search_form'>
 			<div className="top">
-				<CustomInput value={searchValue} onChange={(e) => {setSearchValue(e.target.value)}} />
+				<CustomInput 
+					value={inputValue}
+					onChange={(e) => setInputValue(e.target.value)} 
+				/>
 				<button type="button" className='btn_search' onClick={handleSearch}>검색</button>
 			</div>
 			<div className="content">
-			{searchList && searchList.length > 0 ? 
+			{ searchList && searchList.length > 0 ? 
 				(
 					<ul className='address_wrap'>
 						{
@@ -67,7 +75,7 @@ export const SearchForm = () => {
 							searchList.map((item, idx) => {
 								return (
 									<li key={idx}>
-										<button type='button' onClick={() => handleListOpen()}>
+										<button type='button' onClick={() => handleListOpen(item, idx)}>
 											<div className='title_wrap'>
 												<Link to={item.place_url} target="_blank">
 													<b>{item.place_name}</b><span>{item.category_group_name}</span>
@@ -89,8 +97,8 @@ export const SearchForm = () => {
 				)
 			}
                 {
-                    // searchItemView &&
-                    // <SearchItemView />
+                    listViewPopup &&
+                    <SearchItemView data={listViewData} />
                 }
 			</div>
 		</div>
@@ -99,18 +107,10 @@ export const SearchForm = () => {
 
 
 
-export const SearchItemView = () => {
+export const SearchItemView = ({data}) => {
 	const [active, setActive] = useState(0);
-	const { searchItemViewText, setSearchItemView, setSearchItemViewText } = useMainStore()
+	const { setListViewPopup } = useMainStore()
 	const handleClickSave = () => {
-		setActive(active === 0 ? 1 : 0); 
-		setSearchItemViewText(
-			{
-				active: active,
-				place_name: searchItemViewText.place_name,
-				category_group_name: searchItemViewText.category_group_name
-			}
-		);
 	}
 
 
@@ -122,12 +122,12 @@ export const SearchItemView = () => {
             <div className='top'>
 				<div className="img_wrap">
 					img none
-					<button className='btn_close' type='button' onClick={() => {setSearchItemView(false)}}>
+					<button className='btn_close' type='button' onClick={() => {setListViewPopup(false)}}>
 						<IconClose />
 					</button>
 				</div>
 				<div className='title_wrap'>
-					<p><b>{searchItemViewText.place_name}</b><span>{searchItemViewText.category_group_name}</span></p>
+					<p><b>{data.place_name}</b><span>{data.category_group_name}</span></p>
 				</div>
             </div>
 			<div className="content">
@@ -135,7 +135,7 @@ export const SearchItemView = () => {
 					<li className='btn_list'>
 						<button type="button" onClick={handleClickSave}>
 							<div className="icon_box">
-								<IconStar isActive={searchItemViewText.active} />
+								{/* <IconStar isActive={data.active} /> */}
 							</div>
 							<div className="text">저장</div>
 						</button>

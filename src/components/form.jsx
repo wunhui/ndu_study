@@ -59,9 +59,6 @@ export const CustomInput = forwardRef((props, ref) => {
 		setFocus(false);
 	};
 
-    const handleDeleteValue = () => {
-		setSearchValue('');
-    }
 	useEffect(() => {
 		const targetRef = ref ?? refInput;
 		if ($isAutoHeight && targetRef.current) {
@@ -99,7 +96,17 @@ export const CustomInput = forwardRef((props, ref) => {
             />
 			{
 				value.length > 0 &&
-	            <button type="button" onClick={handleDeleteValue} className='btn_close'><IconClose /></button>
+	            <button type="button" 
+					onClick={(e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						const empty = { target: { value: '' } };
+						inputProps.onChange(empty);
+					}}
+					className='btn_close'
+				>
+					<IconClose />
+				</button>
 			}
 		</label>
 	);

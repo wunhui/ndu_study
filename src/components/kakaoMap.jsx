@@ -1,37 +1,51 @@
 import { Map, MapMarker, MapTypeControl, ZoomControl, CustomOverlayMap } from "react-kakao-maps-sdk";
 import useMainStore from "../store/useMainStore";
 import { fetchCoordinate, fetchKeyword } from '../api/fetchPlaces'
-import { useCallback, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+
 
 const KakaoMap = () => {
     /* eslint-disable */
     const {
-      searchList,
-      map,
+      searchList,         // 검색결과 store
+      map,                // 카카오맵 초기 설정 store
       setMap,
-      markers,
       setMarkers,
-      center,
+      center,             // 좌표 중심 설정 store
       setCenter,
-      level,
+      level,              // 확대축소 설정 store
       setLevel,
-      coordinateData,
-      setCoordinateData
+      coordinates,        // 좌표 검색 store
+      setCoordinates,
+      keywordCoordinates, // 키워드 검색 store
+      setKeywordCoordinates
     } = useMainStore()
-    
-    // 2024.10.14 시작 _ data에 담아두고 싶음
-    const { data } = useQuery({
-        queryKey: ['fetchCoordinate'],
-        queryFn: () => fetchCoordinate(),
-        enabled: false,
-    })
-    // 2024.10.14 끝
 
-    // region 검색결과 마커 생성
+    // 2024.10.15 시작 _ data에 담기 완료
+    // 좌표 데이터 api query
+    const { data, refetch } = useQuery({
+        queryKey: ['coordinateAddress', coordinates],
+        queryFn: () => fetchCoordinate(coordinates), 
+        enabled: coordinates.x !== null && coordinates.y !== null, 
+    });
+
+    // 2024.10.15 시작 _ 키워드 통해 지도 클릭 시 place_name 나오게 변경
+    // 키워드 검색 데이터 api query
+    const { data: keywordData, refetch: keywordRefetch } = useQuery({
+        queryKey: ['fetchKeyword', keywordCoordinates, coordinates.x, coordinates.y],
+        queryFn: () => fetchKeyword({
+            term: keywordCoordinates,
+            x: coordinates.x,
+            y: coordinates.y,
+        }),
+        enabled: keywordCoordinates !== null && coordinates.x !== null && coordinates.y !== null,
+    });
+    // 2024.10.15 끝 
+    // 검색결과 마커 생성
     useEffect(() => {
         if (searchList && searchList.length > 0) {
-            console.log(searchList)
             const bounds = new kakao.maps.LatLngBounds();
             const markers = [];
             // 검색 결과의 각 장소에 대해 마커 생성
@@ -51,54 +65,77 @@ const KakaoMap = () => {
                 bounds.extend(boundPosition); // 각 마커 좌표로 경계 확장
             });
             setMarkers(markers); // Zustand 상태에 마커 배열 저장
-            console.log(markers)
             map.setBounds(bounds); // 검색된 결과의 범위로 지도 중심 및 범위 설정
         }
     }, [searchList])
-
-    // region 지도 클릭 시 마커 생성 _ 2024.10.14 _ 시작
-    let customOverlay = new window.kakao.maps.CustomOverlay({ // 하나만 생성
-        clickable: true,
-        zIndex: 1,
-    });
-
-    const handleMapClick = useCallback(async (event) => {
-        const lat = event.latLng.getLat();
-        const lng = event.latLng.getLng();
     
-        // 여기서 response로 불러오지 말고 query 쪽 data로 불러오고 싶음
-        let response = await fetchCoordinate({ x: lng, y: lat });
-        setCoordinateData(response[0])
-        if (response && response.length > 0) {
-            const address = response[0].address.address_name; 
-            const buildingName = response[0].road_address?.building_name; 
-            customOverlay.setContent(`
-                <div class="info_wrap">
-                    <div class="info_title">
-                        ${buildingName ? buildingName : address}
-                    </div>
-                    <div class="btn_wrap">
-                        <button type="button">링크로 이동</button>
-                    </div>
-                </div>
-            `);
-            customOverlay.setPosition(new window.kakao.maps.LatLng(lat, lng)); // 위치 업데이트
-            customOverlay.setMap(map);
+    
+    // 2024.10.15 시작 좌표 키워드로 장소명 받아오기
+    // 클릭 시 useQuery로 위치값 전송 후 data 사용
+    // 클릭 시 새로운 좌표로 customOverlay 업데이트
+    const customOverlayRef = useRef(null);
+
+    const handleMapClick = (mapData, event) => {
+        const x = event.latLng.getLng();
+        const y = event.latLng.getLat();
+        setCoordinates({ x, y });
+        // 기존 오버레이가 있을 경우 제거
+        if (customOverlayRef.current) {
+            customOverlayRef.current.setMap(null); // 기존 오버레이 제거
+            customOverlayRef.current = null; // 오버레이 변수를 null로 초기화
         }
-    }, [map]);
+    };
+
 
     useEffect(() => {
-        if (map) {
-            // 클릭 이벤트 리스너 추가
-            kakao.maps.event.addListener(map, 'click', handleMapClick);
-            // 컴포넌트 언마운트 시 리스너 제거
-            return () => {
-                kakao.maps.event.removeListener(map, 'click', handleMapClick);
-            };
+        if(coordinates.x !== null && coordinates.y !== null) {
+            refetch();
         }
-    }, [map, markers]);
-    // 2024.10.14 _ 끝
+    }, [coordinates, refetch]);
 
+
+    useEffect(() => {
+        if(data) {
+            if (data.length > 0) {
+                const addressName = data[0]?.address?.address_name; 
+                if (addressName) {
+                    setKeywordCoordinates(addressName);
+                    keywordRefetch();
+                }
+            }
+        }
+    }, [data, keywordRefetch]);
+    // 2024.10.15 끝
+
+    // 2024.10.15 시작 좌표갑에 해당하는 오버레이 열고 정보 넣기
+    useEffect(() => {
+        if (keywordData && keywordData.length > 0) {
+            const x = coordinates.x;
+            const y = coordinates.y;
+            const content = `
+                <div class="info_wrap">
+                    <div class="info_title">
+                        ${keywordData[0].place_name}
+                    </div>
+                    <div class="btn_wrap">
+                        <a target="_blank" href="${keywordData[0].place_url}">
+                            링크로 이동
+                        </a>
+                    </div>
+                </div>
+            `;
+            customOverlayRef.current = new window.kakao.maps.CustomOverlay({
+                position: new window.kakao.maps.LatLng(y, x),
+                content: content,
+                clickable: true,
+                zIndex: 1
+            });
+            customOverlayRef.current.setMap(map);
+        }
+
+    }, [keywordData, coordinates, map]);
+
+        // 2024.10.15 끝
     return (
         <div className="kakao_map_wrapper">
             <Map // 로드뷰를 표시할 Container
@@ -109,6 +146,7 @@ const KakaoMap = () => {
                 level={level}
                 onCreate={setMap}
                 className="kakao_map"
+                onClick={(data, event) => handleMapClick(data, event)}
             >
                 <MapTypeControl position={"TOPRIGHT"} />
                 <ZoomControl position={"RIGHT"} />
