@@ -7,17 +7,27 @@ import { IconClose } from './icons/IconClose';
 import { useEffect, useState } from 'react';
 import { fetchSearch } from '../api/fetchPlaces'
 import { useQuery } from '@tanstack/react-query';
+import { IconMenu } from './icons/IconMenu';
 
 export const LeftWrapper = () => {
+	const [active, setActive] = useState(null)
 	return (
 		<div className="wrapper_left">
-			<SearchForm />
+			<div className="mb_menu">
+				<button type="button" onClick={() => setActive(prev => !prev)}>
+					<IconMenu className={
+						
+						active ? 'active' : ''} />
+				</button>
+			</div>
+			<SearchForm className={active ? 'active' : ''} />
         </div>
 	);
 };
 
-export const SearchForm = () => {
+export const SearchForm = ({className}) => {
 	const {
+		setCenter,
         searchList,
         setSearchList,
         searchValue,
@@ -34,23 +44,35 @@ export const SearchForm = () => {
 		enabled: false,
     });
 
-    const handleSearch = () => {
-        if (!inputValue.trim()) {
-            alert('키워드를 입력해주세요!');
-            return false;
-        }
-        setSearchValue(inputValue); 
-        refetch(); 
-    };
-
-    useEffect(() => {
-        if (data) {
-            setSearchList(data); 
-        } else {
-            setSearchList([]); 
-        }
-    }, [data, setSearchList]);
-
+	// 2024.10.16 검색 결과 값 수정
+	const handleSearch = () => {
+		if (!inputValue.trim()) {
+			alert('키워드를 입력해주세요!');
+			return false;
+		}
+		// 검색 인풋 밸류 setSearchValue에 담아서 밸류값 보내주기
+		setSearchValue(inputValue); 
+	};
+	
+	useEffect(() => {
+		// 검색 버튼 클릭 이벤트에서 보내준 searchValue로 refetch 실행
+		if (searchValue) {
+			refetch();  
+		}
+	}, [searchValue]);
+	
+	useEffect(() => {
+		// refresh 후 스토어에 데이터 저장
+		if (data) {
+			setSearchList(data); 
+			setCenter({
+				lng: data[0]?.x,
+				lat: data[0]?.y
+			}); 
+		}
+	}, [data]);
+	// 2024.10.16 끝
+	
 	// 강남역
 	const handleListOpen = (item, idx) => {
 		setListViewPopup(true)
@@ -58,7 +80,7 @@ export const SearchForm = () => {
 	}
 
 	return (
-		<div className='search_form'>
+		<div className={`search_form ${className}`}>
 			<div className="top">
 				<CustomInput 
 					value={inputValue}
@@ -108,11 +130,36 @@ export const SearchForm = () => {
 
 
 export const SearchItemView = ({data}) => {
-	const [active, setActive] = useState(0);
-	const { setListViewPopup } = useMainStore()
+	const [pushData, setPushData] = useState(
+		{
+			place_name: data.place_name,
+			category_group_name: data.category_group_name,
+			active: false,
+			lat: data.lat,
+			lng: data.lng
+		}
+	);
+	const { setListViewPopup, saveListData, setSaveListData } = useMainStore()
 	const handleClickSave = () => {
+		console.log(data)
+		setPushData(prev => {
+			const updatedData = { ...prev, active: !prev.active };
+			return updatedData; 
+		});
+		console.log(pushData)
 	}
 
+    useEffect(() => {
+        if (data) {
+			setPushData(prev => ({
+                place_name: data.place_name,
+                category_group_name: data.category_group_name,
+				lat: data.y,
+				lng: data.x,
+                active: prev.data
+            }));
+        }
+    }, [data]);
 
 	const handleClickShare = () => {
         // share to social media
@@ -127,7 +174,7 @@ export const SearchItemView = ({data}) => {
 					</button>
 				</div>
 				<div className='title_wrap'>
-					<p><b>{data.place_name}</b><span>{data.category_group_name}</span></p>
+					<p><b>{pushData.place_name}</b><span>{pushData.category_group_name}</span></p>
 				</div>
             </div>
 			<div className="content">
@@ -135,7 +182,7 @@ export const SearchItemView = ({data}) => {
 					<li className='btn_list'>
 						<button type="button" onClick={handleClickSave}>
 							<div className="icon_box">
-								{/* <IconStar isActive={data.active} /> */}
+								<IconStar isActive={pushData.active} />
 							</div>
 							<div className="text">저장</div>
 						</button>

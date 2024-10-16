@@ -4,6 +4,7 @@
 	height: $VH;
 	overflow: hidden;
 	@include tiny {
+		@include center($align: flex-start, $justify: flex-start);
 		flex-direction: column;
 
 	}

@@ -6,15 +6,72 @@
         width: 100%;
         @include media(height, 50);
     }
+    .mb_menu{
+        display: none;
+    }
+    @include tiny {
+        .mb_menu {
+            @include media(height, 50);
+            display: block;
+            position: absolute;
+            z-index: 3;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: $White;
+            border-bottom: 1px solid $Cyan500;
+            & > button {
+                @include media(width, 32);
+                @include media(height, 32);
+                @include media(top, 9);
+                @include media(right, 9);
+                display: block;
+                position: absolute;
+                .icon_menu {
+                        .menu1{
+                            transform-origin:3px 7px;
+                            transition: .5s;
+                        }
+                        .menu2{
+                            opacity:1;
+                            transition: .5s;
+                        }
+                        .menu3{
+                            opacity:1;
+                            transition: .5s;
+                            transform-origin:5px 18px;
+                        }
+                        &.active {
+                        .menu1{
+                            transform:rotate(45deg);
+                        }
+                        .menu2{
+                            opacity:0;
+                        }
+                        .menu3{
+                            transform:rotate(-45deg);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 .search_form {
     @include media(padding, 10, 12);
     position: relative;
     @include tiny {
+        @include mediaCalc(height, 100vh, '-', 50);
+        @include media(top, 50);
+        display: none;
         width: 100%;
         position: absolute;
-        top: 0;
+        z-index: 3;
+        background-color: $White;
+        &.active {
+            display: block;
+        }
     }
     > .top {
         @include media(gap, 8);
