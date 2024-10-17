@@ -10,7 +10,7 @@
         height: 100%;
         .info_wrap {
             @include fontValue($size: 16, $weight: 500);
-            @include media(width, 180);
+            @include media(min-width, 180);
             @include media(padding, 12, 10);
             @include media(border-radius, 4);
             text-align: center;

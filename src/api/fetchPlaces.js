@@ -25,17 +25,19 @@ export const fetchSearch = async ({term}) => {
 // 2024.10.15 좌표 클릭 시 맵 api 추가
 export const fetchKeyword = async ({term, x, y}) => {
   try {
+    if (!term) {
+      throw new Error("Query parameter required");
+    }
     const params = {
-      query: term, // term은 항상 사용
+      query: term,
+      x: x,
+      y: y,
+      radius: 10,
+      sort: 'distance',
     };
 
-    if (x !== undefined && y !== undefined) {
-      params.x = x;
-      params.y = y;
-    }
-
     const response = await axios.get(
-      `https://dapi.kakao.com/v2/local/search/keyword.json?x=${x}&y=${y}&radius=10&sort=distance`,
+      `https://dapi.kakao.com/v2/local/search/keyword.json`,
       {
         headers: {
           Authorization: `KakaoAK ${process.env.REACT_APP_KAKAOMAP_KEY}`,

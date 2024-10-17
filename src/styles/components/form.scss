@@ -4,7 +4,7 @@
     @include media(height, 40);
     @include media(border-radius, 8);
     @include media(padding, 12, 14);
-    border: 2px solid $Cyan500;
+    border: 1px solid $Gray200;
     width: 100%;
     position: relative;
     .btn_close{

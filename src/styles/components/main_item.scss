@@ -1,5 +1,6 @@
 .wrapper_left {
-    @include media(width, 350);
+    display: flex;
+    // @include media(width, 350);
     height: 100%;
     border-right: 1px solid $Gray200;
     @include tiny {
@@ -8,6 +9,37 @@
     }
     .mb_menu{
         display: none;
+    }
+    .menu_list {
+        width: 63px;
+        border-right: 1px solid $Gray200;
+        .logo {
+            position: relative;
+            @include center;
+            height: 63px;
+            font-size: 18px;
+            &::before {
+                content: '';
+                display: inline-block;
+                width: 30%;
+                height: 1px;
+                position: absolute;
+                left: 50%;
+                bottom: 0;
+                transform: translateX(-50%);
+                background-color: $Gray200;
+            }
+        }
+        ul {
+            li {
+                button {
+                    @include center;
+                    @include fontValue($size: 14, $weight: 500);
+                    width: 100%;
+                    height: 50px;
+                }
+            }
+        }
     }
     @include tiny {
         .mb_menu {
@@ -58,9 +90,10 @@
     }
 }
 
-.search_form {
+.search_wrap {
     @include media(padding, 10, 12);
     position: relative;
+    width: 290px;
     @include tiny {
         @include mediaCalc(height, 100vh, '-', 50);
         @include media(top, 50);
@@ -73,10 +106,10 @@
             display: block;
         }
     }
-    > .top {
+    > .search_form {
         @include media(gap, 8);
         @include media(padding-bottom, 12);
-        border-bottom: 1px solid $Cyan500;
+        border-bottom: 1px solid $Gray200;
         display: flex;
         .custom_input_wrapper {
             @include mediaCalc(width, 100%, '-', 75);
@@ -86,12 +119,13 @@
             @include media(width, 60);
             @include media(height, 40);
             @include fontValue($size: 14, $weight: bold);
-            background-color: $Cyan500;
+            background-color: $White;
+            border: 1px solid $Gray200;
             border-radius: 8px;
-            color: $White;
+            color: $Black;
         }
     }
-    > .content {
+    > .search_list {
         .address_wrap {
             @include media(padding-bottom, 120);
             overflow-y: auto;
@@ -105,7 +139,7 @@
                     a {
                         display: block;
                         text-align: left;
-                        b {color: $Cyan500; @include fontValue($size: 16, $weight: 700);};
+                        b {color: $Gray900; @include fontValue($size: 16, $weight: 700);};
                         span {
                             color: $Gray900;
                             @include media(margin-left, 4);
@@ -135,7 +169,7 @@
     @include media(width, 300);
     @include media(right, -320);
     @include media(top, 20);
-    @include mediaCalc(height, 100%, '-', 110);
+    @include mediaCalc(height, 100%, '-', 50);
     border-radius: 12px;
     overflow: hidden;
     z-index: 2;
@@ -211,5 +245,62 @@
             @include media(height, 10);
             background-color: $Gray200;
         }
+    }
+}
+
+.save_wrap {
+    @include media(padding, 10, 12);
+    position: relative;
+    width: 290px;
+    @include tiny {
+        @include mediaCalc(height, 100vh, '-', 50);
+        @include media(top, 50);
+        display: none;
+        width: 100%;
+        position: absolute;
+        z-index: 3;
+        background-color: $White;
+        &.active {
+            display: block;
+        }
+    }
+    > .save_list {
+        ul {
+            @include media(padding-bottom, 120);
+            overflow-y: auto;
+            height: 100vh;
+            li + li {
+                border-top: 1px solid $Gray200;
+            }
+            li {
+                @include media(padding, 8,0);
+                cursor: pointer;
+                .title_wrap {
+                    a {
+                        display: block;
+                        text-align: left;
+                        b {color: $Gray900; @include fontValue($size: 16, $weight: 700);};
+                        span {
+                            color: $Gray900;
+                            @include media(margin-left, 4);
+                            @include fontValue($size: 14, $weight: 400);
+                        }
+                    }
+                }
+                .address_list {
+                    @include media(margin-top, 8);
+                    @include fontValue($size: 14, $weight: 400);
+                    p + p {
+                        @include media(margin-top, 4);
+                    }
+                    p { text-align: left; color:  $Gray900; }
+                }
+            }
+        }
+    }
+    .fetching_text{ 
+        @include fontValue($size: 16, $weight: bold);
+        @include media(padding-top, 60);
+        text-align: center;
     }
 }

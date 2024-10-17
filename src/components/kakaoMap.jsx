@@ -3,6 +3,7 @@ import useMainStore from "../store/useMainStore";
 import { fetchCoordinate, fetchKeyword } from '../api/fetchPlaces'
 import { useRef, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import {useGeolocation} from "../hook/useGeoLocation";
 
 
@@ -41,7 +42,7 @@ const KakaoMap = () => {
             x: coordinates.x,
             y: coordinates.y,
         }),
-        enabled: keywordCoordinates !== null && coordinates.x !== null && coordinates.y !== null,
+        enabled: !!keywordCoordinates && !!coordinates.x && !!coordinates.y,
     });
     // 검색결과 마커 생성
     useEffect(() => {
@@ -84,26 +85,19 @@ const KakaoMap = () => {
             customOverlayRef.current = null; // 오버레이 변수를 null로 초기화
         }
     };
-
-
+    
     useEffect(() => {
-        if(coordinates.x !== null && coordinates.y !== null) {
-            refetch();
-        }
-    }, [coordinates, refetch]);
-
-
-    useEffect(() => {
-        if(data) {
+        if (data) {
             if (data.length > 0) {
-                const addressName = data[0]?.address?.address_name; 
-                if (addressName) {
-                    setKeywordCoordinates(addressName);
-                    keywordRefetch();
+                const addressName = data[0]?.address?.address_name;
+    
+                if (addressName) {  
+                    setKeywordCoordinates(addressName);  
                 }
             }
         }
-    }, [data, keywordRefetch]);
+    }, [data]);
+
     useEffect(() => {
         if (keywordData && keywordData.length > 0) {
             const x = coordinates.x;
